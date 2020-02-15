@@ -9,12 +9,40 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(janitor)
 library(tidyverse)
-
+library(lubridate)
 ```
 
 ```{r}
-x <- SpotifyDataForR5
+#Loading Data
+x <- read_csv("SpotifyDataForR5.csv",
+  col_types = cols(
+    Date = col_date(format = "%m/%d/%y")))
 
-x
+a <- x %>% 
+  mutate(EasternTime = (TimeofDay)-5:00)
 ```
 
+
+```{r}
+#Trying to Visualize Minutes Listened by Time of Day
+y <- x %>% 
+  group_by(TimeofDay) %>% 
+  mutate(totalMinutes = sum(MinutesListened))
+
+y
+
+ggplot(y, aes(TimeofDay, MinutesListened)) + geom_col()
+```
+
+
+```{r}
+#Trying to Visualize Minutes Listened by Time of Day, filtering for just EST
+z <- x %>% 
+  group_by(TimeofDay) %>% 
+  filter(Date >= "2019-09-01" & Date <= "2019-12-01") %>% 
+  mutate(totalMinutesFilter = sum(MinutesListened))
+
+z
+
+ggplot(z, aes(TimeofDay, MinutesListened)) + geom_col()
+```
