@@ -374,10 +374,8 @@ x &lt;- read_csv(&quot;SpotifyDataForR5.csv&quot;,
   col_types = cols(
     Date = col_date(format = &quot;%m/%d/%y&quot;)))
 
-a &lt;- x %&gt;% 
-  mutate(EasternTime = (TimeofDay)-5:00)</code></pre>
-<pre><code>## Warning in `-.default`((TimeofDay), 5:0): longer object length is not a multiple
-## of shorter object length</code></pre>
+#a &lt;- x %&gt;% 
+#    with_tz(TimeofDay, &quot;America/New_York&quot;)</code></pre>
 <pre class="r"><code>#Trying to Visualize Minutes Listened by Time of Day
 y &lt;- x %&gt;% 
   group_by(TimeofDay) %&gt;% 

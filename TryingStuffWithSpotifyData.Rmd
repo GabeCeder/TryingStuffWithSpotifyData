@@ -18,8 +18,8 @@ x <- read_csv("SpotifyDataForR5.csv",
   col_types = cols(
     Date = col_date(format = "%m/%d/%y")))
 
-a <- x %>% 
-  mutate(EasternTime = (TimeofDay)-5:00)
+#a <- x %>% 
+#    with_tz(TimeofDay, "America/New_York")
 ```
 
 
