@@ -31,7 +31,7 @@ y <- x %>%
 
 y
 
-ggplot(y, aes(TimeofDay, MinutesListened)) + geom_col()
+ggplot(y, aes(TimeofDay, totalMinutes)) + geom_col()
 ```
 
 
@@ -44,5 +44,17 @@ z <- x %>%
 
 z
 
-ggplot(z, aes(TimeofDay, MinutesListened)) + geom_col()
+ggplot(z, aes(TimeofDay, totalMinutesFilter)) + geom_col()
+```
+
+
+```{r}
+#Trying to Visualize Minutes Listened by Day of the Year
+d <- x %>% 
+  group_by(Date) %>% 
+  mutate(DayMinutes = sum(MinutesListened))
+
+d
+
+ggplot(d, aes(Date, DayMinutes, color = Month)) + geom_col(width = 10)
 ```
