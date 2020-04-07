@@ -10,13 +10,14 @@ knitr::opts_chunk$set(echo = TRUE)
 library(janitor)
 library(tidyverse)
 library(lubridate)
+options(scipen = 999)
 ```
 
 ```{r, echo = FALSE, message = FALSE}
 
 # Loading Data
 
-x <- read_csv("SpotifyDataForR5.csv",
+x <- read_csv("SpotifyData.csv",
   col_types = cols(
     Date = col_date(format = "%m/%d/%y"))) %>% 
   clean_names() %>% 
@@ -28,14 +29,12 @@ x <- read_csv("SpotifyDataForR5.csv",
          weekday = "dayofthe_week",
          month) %>% 
   separate(artist, "artist",",")
-         
-options(scipen = 999)
 
 
 # Most listened to songs by an artist
 
 x %>% 
-  filter(artist == "Men At Work") %>% 
+  filter(artist == "Drake") %>% 
   group_by(title) %>% 
   summarize(total_listening = sum(mins)) %>% 
   arrange(desc(total_listening))
@@ -75,48 +74,42 @@ ggplot(a, aes(date, color = artist)) +
 ```{r}
 #Trying to Visualize Minutes Listened by Time of Day
 
+daytime <- x %>% group_by(time) %>% 
+  filter(date > "2019-10-01" &
+           date < "2019-11-01") %>% 
+  summarize(total = sum(mins)) %>% 
+  separate(time, c("hour", "minute", "second")) %>% 
+  group_by(hour)
 
+
+ggplot(daytime, aes(hour, total)) +
+  geom_col()
 
 ```
+
+```{r}
+# Minutes listened to an artist by day of the week
+
+drake_days <- x %>% 
+  filter(artist == "Sergei Rachmaninoff") %>% 
+  group_by(weekday) %>% 
+  summarize(total_mins = sum(mins))
+
+ggplot(drake_days, aes(weekday, total_mins)) +
+  geom_col()
+```
+
 
 
 ```{r}
 #Trying to Visualize Minutes Listened by Time of Day, filtering for just EST
-z <- x %>% 
-  group_by(TimeofDay) %>% 
-  filter(Date >= "2019-09-01" & Date <= "2019-12-01") %>% 
-  mutate(totalMinutesFilter = sum(MinutesListened))
-
-z
-
-ggplot(z, aes(TimeofDay, totalMinutesFilter)) + geom_col()
-```
-
-
-```{r}
-#Trying to Visualize Minutes Listened by Day of the Year
-d <- x %>% 
-  group_by(Date) %>% 
-  mutate(DayMinutes = sum(MinutesListened))
-
-d
-
-ggplot(d, aes(Date, DayMinutes, color = Month)) + geom_col(width = 10)
-```
-
-
-```{r}
-drake_cum <- x %>% 
-  filter(Artist == "Travis Scott," |
-           Artist == "Tyga," |
-           Artist == "G-Eazy,") %>% 
-#  mutate(total = cumsum(MinutesListened)) %>%
-    group_by(Date, Artist) %>%
-  summarize(total_day = sum(MinutesListened))
-  
-  
-ggplot(drake_cum, aes(Date, total_day, color = Artist)) +
-  geom_col(position = "dodge") +
-  theme_classic()
+# z <- x %>% 
+#   group_by(TimeofDay) %>% 
+#   filter(Date >= "2019-09-01" & Date <= "2019-12-01") %>% 
+#   mutate(totalMinutesFilter = sum(MinutesListened))
+# 
+# z
+# 
+# ggplot(z, aes(TimeofDay, totalMinutesFilter)) + geom_col()
 ```
 
