@@ -12,11 +12,60 @@ library(tidyverse)
 library(lubridate)
 ```
 
-```{r}
-#Loading Data
+```{r, echo = FALSE, message = FALSE}
+
+# Loading Data
+
 x <- read_csv("SpotifyDataForR5.csv",
   col_types = cols(
-    Date = col_date(format = "%m/%d/%y")))
+    Date = col_date(format = "%m/%d/%y"))) %>% 
+  clean_names() %>% 
+  select(date,
+         artist, 
+         title = "song_title",
+         mins = "minutes_listened",
+         time = "timeof_day",
+         weekday = "dayofthe_week",
+         month) %>% 
+  separate(artist, "artist",",")
+         
+options(scipen = 999)
+
+
+# Most listened to songs by an artist
+
+x %>% 
+  filter(artist == "Men At Work") %>% 
+  group_by(title) %>% 
+  summarize(total_listening = sum(mins)) %>% 
+  arrange(desc(total_listening))
+
+
+# Most listened to artists
+
+x %>% group_by(artist) %>% 
+  summarize(total_mins = sum(mins)) %>% 
+  arrange(desc(total_mins))
+
+
+
+# Compare listening trends among artists
+
+a <- x %>% 
+  filter(artist == "Drake" |
+           artist == "Sam Cooke" |
+           artist == "Post Malone" |
+           artist == "Tyga" |
+           artist == "G-Eazy" |
+           artist == "Young Thug" |
+           artist == "YNW Melly" |
+           artist == "The Weeknd") %>% 
+  group_by(artist, date) %>% 
+  summarize(totalmins = sum(mins))
+
+ggplot(a, aes(date, color = artist)) +
+      geom_density() 
+
 
 #a <- x %>% 
 #    with_tz(TimeofDay, "America/New_York")
@@ -25,13 +74,9 @@ x <- read_csv("SpotifyDataForR5.csv",
 
 ```{r}
 #Trying to Visualize Minutes Listened by Time of Day
-y <- x %>% 
-  group_by(TimeofDay) %>% 
-  mutate(totalMinutes = sum(MinutesListened))
 
-y
 
-ggplot(y, aes(TimeofDay, totalMinutes)) + geom_col()
+
 ```
 
 
@@ -58,3 +103,20 @@ d
 
 ggplot(d, aes(Date, DayMinutes, color = Month)) + geom_col(width = 10)
 ```
+
+
+```{r}
+drake_cum <- x %>% 
+  filter(Artist == "Travis Scott," |
+           Artist == "Tyga," |
+           Artist == "G-Eazy,") %>% 
+#  mutate(total = cumsum(MinutesListened)) %>%
+    group_by(Date, Artist) %>%
+  summarize(total_day = sum(MinutesListened))
+  
+  
+ggplot(drake_cum, aes(Date, total_day, color = Artist)) +
+  geom_col(position = "dodge") +
+  theme_classic()
+```
+
