@@ -10,11 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(janitor)
 library(tidyverse)
 library(lubridate)
+library(ggrepel)
 options(scipen = 999)
 ```
 
 ```{r, echo = FALSE, message = FALSE}
-
 # Loading Data
 
 x <- read_csv("SpotifyData.csv",
@@ -30,14 +30,54 @@ x <- read_csv("SpotifyData.csv",
          month) %>% 
   separate(artist, "artist",",")
 
-
 # Most listened to songs by an artist
 
-x %>% 
-  filter(artist == "Drake") %>% 
-  group_by(title) %>% 
+top_songs <- x %>% 
+  group_by(artist, title) %>% 
+  summarize(total_mins = sum(mins)) %>% 
+  arrange(desc(total_mins))
+
+top_songs
+
+top_artists <- x %>% 
+  group_by(artist, title) %>% 
+  summarize(total_mins = sum(mins)) %>% 
+  ungroup() %>% 
+  group_by(artist) %>% 
+  summarize(big_artists = sum(total_mins))
+
+top_artists
+
+both <- top_songs %>% left_join(top_artists, by = "artist") %>% 
+  filter(total_mins > 165)
+
+both %>% ggplot(aes(big_artists, total_mins, label = title, color = artist)) + 
+  geom_point() +
+  geom_label_repel(hjust=1, vjust=0.5, size = 2, alpha = 0.8) +
+  theme_classic() +
+  labs(
+    title = "Most popular songs by total listening to artists",
+    subtitle = "Drake dominates the listening by specific artist",
+       y = "Minutes Listened to Individual Songs",
+       x = "Minutes Listened to Each Artist",
+    color = "",
+    caption = "Data from Jan. 5 2019 to Jan. 5 2020") +
+      theme(legend.position = "none") +
+  scale_color_viridis_d("plasma")
+```
+
+
+```{r, echo = FALSE, message = FALSE}
+drake <- x %>% 
+  filter(artist == "Juice WRLD") %>% 
+  group_by(title) %>%
   summarize(total_listening = sum(mins)) %>% 
-  arrange(desc(total_listening))
+  arrange(desc(total_listening)) 
+drake
+
+drake %>% 
+  ggplot(aes(date, color = title)) +
+  geom_density()
 
 
 # Most listened to artists
@@ -46,6 +86,18 @@ x %>% group_by(artist) %>%
   summarize(total_mins = sum(mins)) %>% 
   arrange(desc(total_mins))
 
+
+x %>% 
+  filter(artist == "Juice WRLD") %>% 
+  filter(title == c("Feeling,", 
+                    "Armed And Dangerous,",
+                    "Robbery,",
+                    "Fast,",
+                    "Hear Me Calling,")) %>% 
+  group_by(date, title) %>% 
+  summarize(total_day = sum(mins)) %>% 
+  ggplot(aes(date, color = title)) +
+  geom_density()
 
 
 # Compare listening trends among artists
