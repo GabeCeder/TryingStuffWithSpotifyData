@@ -11,6 +11,7 @@ library(janitor)
 library(tidyverse)
 library(lubridate)
 library(ggrepel)
+library(dplyr)
 options(scipen = 999)
 ```
 
@@ -34,10 +35,17 @@ x <- read_csv("SpotifyData.csv",
 
 top_songs <- x %>% 
   group_by(artist, title) %>% 
-  summarize(total_mins = sum(mins)) %>% 
-  arrange(desc(total_mins))
+    summarize(total_mins = sum(mins)) %>% 
+    top_n(n=1) %>% 
+    arrange(desc(total_mins))
 
-top_songs
+  
+  
+# top_songs <- x %>% 
+#   group_by(artist, title) %>% 
+#   summarize(total_mins = sum(mins)) %>% 
+#   arrange(desc(total_mins))
+
 
 top_artists <- x %>% 
   group_by(artist, title) %>% 
@@ -49,21 +57,28 @@ top_artists <- x %>%
 top_artists
 
 both <- top_songs %>% left_join(top_artists, by = "artist") %>% 
-  filter(total_mins > 165)
+  filter(total_mins > 165 | big_artists > 1100) %>% 
+  filter(artist != "Why Is This Happening? with Chris Hayes" &
+           artist != "Pod Save America" &
+            artist != "Pod Save the World")
 
-both %>% ggplot(aes(big_artists, total_mins, label = title, color = artist)) + 
+both
+
+both %>% ggplot(aes(big_artists, total_mins, label = title, size = big_artists, color = artist)) + 
   geom_point() +
   geom_label_repel(hjust=1, vjust=0.5, size = 2, alpha = 0.8) +
   theme_classic() +
   labs(
-    title = "Most popular songs by total listening to artists",
-    subtitle = "Drake dominates the listening by specific artist",
+    title = "Top songs that Gabe listened to in 2019 from each artist",
+  #  subtitle = "Drake dominates the listening",
        y = "Minutes Listened to Individual Songs",
        x = "Minutes Listened to Each Artist",
     color = "",
     caption = "Data from Jan. 5 2019 to Jan. 5 2020") +
       theme(legend.position = "none") +
   scale_color_viridis_d("plasma")
+
+ggsave("Listeningsummary2019.jpg", plot = last_plot(), width = 7, height = 5)
 ```
 
 
