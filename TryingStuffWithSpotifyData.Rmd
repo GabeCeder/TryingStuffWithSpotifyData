@@ -75,10 +75,10 @@ both %>% ggplot(aes(big_artists, total_mins, label = title, size = big_artists, 
        x = "Minutes Listened to Each Artist",
     color = "",
     caption = "Data from Jan. 5 2019 to Jan. 5 2020") +
-      theme(legend.position = "none") +
-  scale_color_viridis_d("plasma")
+      theme(legend.position = "none") 
+ # scale_color_viridis_d("plasma")
 
-ggsave("Listeningsummary2019.jpg", plot = last_plot(), width = 7, height = 5)
+# ggsave("Listeningsummary2019.jpg", plot = last_plot(), width = 7, height = 5)
 ```
 
 
@@ -166,6 +166,41 @@ ggplot(drake_days, aes(weekday, total_mins)) +
   geom_col()
 ```
 
+```{r}
+x %>% 
+  filter(title == "Psycho (feat. Ty Dolla $ign),") %>% 
+  group_by(date) %>% 
+  summarize(total_daily_listen = sum(mins)) %>% 
+  ggplot(aes(date, total_daily_listen)) +
+  geom_col()
+
+x %>% 
+  filter(title == "Plastic Bag,") %>% 
+  group_by(date) %>% 
+  summarize(total_daily_listen = sum(mins),
+            total_daily_count = n()) %>% 
+  ggplot(aes(date)) +
+  geom_col(aes(y = total_daily_listen)) +
+  geom_line(aes(y = total_daily_count)) +
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "Minutes Listened",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*1, name="Times Listened")) +
+    theme_classic() +
+  labs(
+    title = "Gabe's Listening to Plastic Bag by Drake and Future in 2019",
+  #  subtitle = "Drake dominates the listening",
+    #   y = "Minutes Listened to Individual Songs",
+   #    x = "Minutes Listened to Each Artist",
+    caption = "Data from Jan. 5 2019 to Jan. 5 2020")
+
+
+ggsave("PlasticBagNumbers.jpg", plot = last_plot(), width = 7, height = 5)
+
+``` 
 
 
 ```{r}
